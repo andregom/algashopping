@@ -1,41 +1,26 @@
-import React, { useState, useEffect } from 'react'
-import LineChart from '../../shared/LineChart'
-import AppContainer from '../AppContainer/AppContainer'
-import AppHeader from '../AppHeader'
-import ShoppingList from '../ShoppingList'
-import { Wrapper, Container } from './App.styles'
-import productsMock from '../../mocks/products.json'
-import extractPercentage from '../../utils/extractPercentage'
+import React from 'react';
+import LineChart from '../../shared/LineChart';
+import AppContainer from '../AppContainer/AppContainer';
+import AppHeader from '../AppHeader';
+import ShoppingList from '../ShoppingList';
+import { Wrapper, Container } from './App.styles';
+import extractPercentage from '../../utils/extractPercentage';
+import Calculator from '../Calculator';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectSelectedProducts, selectSelectedProductsTotalPrice } from '../../store/Products/Products.selector';
+import { toggleProduct } from '../../store/Products/Products.actions';
 
 function App () {
+  const dispatch = useDispatch()
   const colors = ['#62CBC6', '#00ABAD', '#00858C', '#006073', '#004D61']
 
-  const [products, setProducts] = useState(productsMock.products)
-  const [selectedProducts, setSelectedProducts] = useState([])
-  const [totalPrice, setTotalPrice] = useState(0)
+  const selectedProducts = useSelector(selectSelectedProducts)
+  const totalPrice = useSelector(selectSelectedProductsTotalPrice)
 
-  useEffect(() => {
-    const newSelectedProducts = products
-      .filter(product => product.checked)
-    
-    setSelectedProducts(newSelectedProducts)
-  }, [products])
 
-  useEffect(() => {
-    const total = selectedProducts
-      .map(product => product.price)
-      .reduce((a, b) => a + b, 0)
 
-    setTotalPrice(total)
-  }, [selectedProducts])
-
-  function handleToggle (id, checked, name) {
-    const newProducts = products.map(product =>
-        product.id === id
-          ? { ...product, checked: !product.checked }
-          : product
-    )
-    setProducts(newProducts)
+  function handleToggle (id) {
+    dispatch(toggleProduct(id))
   }
 
   return <Wrapper>
@@ -45,14 +30,13 @@ function App () {
         left={
           <ShoppingList
             title="Produtos disponíveis"
-            products={products}
             onToggle={handleToggle}
           />}
         middle={
           <ShoppingList
             title="Sua lista de compras"
-            products={selectedProducts}
             onToggle={handleToggle}
+            displayOnlySelected={true}
           />}
         right={<div>
           estatisticas
@@ -109,6 +93,8 @@ function App () {
                 currency: 'BRL'
               }) }
             </div>
+
+            <Calculator />
           </div>
         </div>}
       />
